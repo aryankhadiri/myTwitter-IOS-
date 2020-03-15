@@ -25,6 +25,7 @@ class HomeTableViewController: UITableViewController {
         let user = tweetArray[indexPath.row]["user"] as! NSDictionary
         let imageUrl = URL(string: (user["profile_image_url_https"] as? String)!)
         let data = try? Data(contentsOf: imageUrl!)
+        let tweetId = tweetArray[indexPath.row]["id"] as! Int
         
         
         let cell = tableView.dequeueReusableCell(withIdentifier: "tweetCell", for: indexPath) as! TweetCell
@@ -33,6 +34,9 @@ class HomeTableViewController: UITableViewController {
         if let imageData = data{
         cell.profilePic.image = UIImage(data:imageData)
         }
+        cell.setFavorit(tweetArray[indexPath.row]["favorited"] as! Bool)
+        cell.tweetId = tweetId
+        cell.setRetweet(tweetArray[indexPath.row]["retweeted"] as! Bool)
             return cell
         
     }
@@ -49,6 +53,13 @@ class HomeTableViewController: UITableViewController {
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        loadTweets()
+    
+    }
+    
+    
 
     @objc func loadTweets(){
         let myURL = "https://api.twitter.com/1.1/statuses/home_timeline.json"
@@ -64,7 +75,7 @@ class HomeTableViewController: UITableViewController {
             self.tableView.reloadData()
             self.myRefreshControll.endRefreshing()
         }, failure: { (Error) in
-            print("Tweets couldn't load")
+            print("Tweets couldn't load\(Error)")
         })
     }
     // MARK: - Table view data source
@@ -78,7 +89,8 @@ class HomeTableViewController: UITableViewController {
         // #warning Incomplete implementation, return the number of rows
         return self.tweetArray.count
     }
-
+    
+    
     /*
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "reuseIdentifier", for: indexPath)
